@@ -33,6 +33,12 @@ class App(tkinter.Tk):
         self.entry_token = ttk.Entry(self, width=50, show="*")
         self.entry_token.pack(pady=5)
 
+        self.lbl_interval = ttk.Label(self, text="Interval: (minutes)")
+        self.lbl_interval.pack(pady=5)
+
+        self.entry_interval = ttk.Entry(self, width=10)
+        self.entry_interval.pack(pady=5)
+
         self.btn_start = ttk.Button(self, text="Start", command=self.start_polling)
         self.btn_start.pack(pady=10)
 
@@ -58,7 +64,8 @@ class App(tkinter.Tk):
 
     def start_polling(self):
         token = self.entry_token.get()
-        self.poller = Poller(token, CALENDAR_ID, on_update=self.update_display)
+        secs = int(self.entry_interval.get()) * 60
+        self.poller = Poller(token, CALENDAR_ID, secs, on_update=self.update_display)
         self.poller.start()
 
     def force_update(self):
