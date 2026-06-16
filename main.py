@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from poller import Poller
 from datetime import datetime
 import os
+from sl_api import check_sl
 
 load_dotenv()
 CALENDAR_ID = os.getenv("CALENDAR_ID")
@@ -13,7 +14,7 @@ class App(tkinter.Tk):
         super().__init__()
         self.title("Stonify Watcher")
         self.iconbitmap("eye_icon.ico")
-        self.geometry("400x500")
+        self.geometry("500x500")
         self.attributes("-topmost", True)
         self.resizable(False, False)
         self.configure(bg="#0d1117")
@@ -33,8 +34,14 @@ class App(tkinter.Tk):
         self.entry_token = ttk.Entry(self, width=50, show="*")
         self.entry_token.pack(pady=5)
 
-        self.lbl_interval = ttk.Label(self, text="Interval: (minutes)")
-        self.lbl_interval.pack(pady=5)
+        lbl_btoken = ttk.Label(self, text="SpeedLabel Token")
+        lbl_btoken.pack(pady=5)
+
+        self.entry_btoken = ttk.Entry(self, width=50, show="*")
+        self.entry_btoken.pack(pady=5)
+
+        lbl_interval = ttk.Label(self, text="Interval: (minutes)")
+        lbl_interval.pack(pady=5)
 
         self.entry_interval = ttk.Entry(self, width=10)
         self.entry_interval.pack(pady=5)
@@ -48,13 +55,15 @@ class App(tkinter.Tk):
         self.lbl_update = ttk.Label(self, text="Last Update: ")
         self.lbl_update.pack(pady=5)
 
-        self.tree = ttk.Treeview(self, columns=("Project", "CAD Tech", "Description"), show="headings")
+        self.tree = ttk.Treeview(self, columns=("Project", "CAD Tech", "Description", "SpeedLabel"), show="headings")
         self.tree.heading("Project", text="Project")
         self.tree.column("Project", width=80)
         self.tree.heading("CAD Tech", text="CAD Tech")
         self.tree.column("CAD Tech", width=100)
         self.tree.heading("Description", text="Description")
-        self.tree.column("Description", width=200)
+        self.tree.column("Description", width=150)
+        self.tree.heading("SpeedLabel", text="SpeedLabel?")
+        self.tree.column("SpeedLabel", width=80)
         self.tree.pack(fill="both", expand=True)
         self.tree.tag_configure("new", background="#388bfd", foreground="#0d1117")
 
@@ -78,13 +87,20 @@ class App(tkinter.Tk):
         self.lbl_update.config(text=f"Last Update: {lst_update} ")
         current_ids = {job["project"] for job in jobs}
         new_ids = current_ids.difference(self.known_jobs)
+        b_token = self.entry_btoken.get()
+
         for job in jobs:
             description = f"{(job['description'] or '').replace('\n', ' ')}"
+
             if job["project"] in new_ids:
-                self.tree.insert("", "end", values=(job["project"], job["assignee"], description), tags=("new",))
+                if check_sl(job["project"], b_token) == False:
+                    status = "Missing"
+                else:
+                    status = "Good"
+                self.tree.insert("", "end", values=(job["project"], job["assignee"], description, status), tags=("new",))
                 self.known_jobs.add(job["project"])
             else:
-                self.tree.insert("", "end", values=(job["project"], job["assignee"], description))
+                self.tree.insert("", "end", values=(job["project"], job["assignee"], description, ""))
         self.known_jobs = current_ids
 
 app = App()
