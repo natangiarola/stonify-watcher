@@ -67,7 +67,8 @@ def parse_jobs(data):
                        "assignee": pt["task"]["assignedUser"]["name"],
                        "type": pt["task"]["taskType"]["name"],
                        "start": pt["task"]["startAt"],
-                       "description": pt["task"]["description"]
+                       "description": pt["task"]["description"],
+                       "task_id": pt["task"]["id"]
                        }
                 jobs.append(job)
 

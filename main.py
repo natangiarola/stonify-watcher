@@ -87,14 +87,14 @@ class App(tkinter.Tk):
         self.tree.delete(*self.tree.get_children())
         lst_update = datetime.now().strftime("%H:%M:%S")
         self.lbl_update.config(text=f"Last Update: {lst_update} ")
-        current_ids = {job["project"] for job in jobs}
+        current_ids = {job["task_id"] for job in jobs}
         new_ids = current_ids.difference(self.known_jobs)
         b_token = self.entry_btoken.get()
 
         for job in jobs:
             description = f"{(job['description'] or '').replace('\n', ' ')}"
 
-            if job["project"] in new_ids:
+            if job["task_id"] in new_ids:
                 sl_bucket = check_sl(job["project"], b_token)
                 if sl_bucket == False:
                     status = "Missing"
@@ -103,9 +103,9 @@ class App(tkinter.Tk):
                 else:
                     status = "Error"
                 self.tree.insert("", "end", values=(job["project"], job["assignee"], job["type"], description, status), tags=("new",))
-                self.known_jobs[job["project"]] = status
+                self.known_jobs[job["task_id"]] = status
             else:
-                self.tree.insert("", "end", values=(job["project"], job["assignee"], job["type"], description, self.known_jobs[job["project"]]))
+                self.tree.insert("", "end", values=(job["project"], job["assignee"], job["type"], description, self.known_jobs[job["task_id"]]))
 
 app = App()
 app.mainloop()
