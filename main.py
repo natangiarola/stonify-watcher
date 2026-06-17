@@ -93,10 +93,13 @@ class App(tkinter.Tk):
             description = f"{(job['description'] or '').replace('\n', ' ')}"
 
             if job["project"] in new_ids:
-                if check_sl(job["project"], b_token) == False:
+                sl_bucket = check_sl(job["project"], b_token)
+                if sl_bucket == False:
                     status = "Missing"
-                else:
+                elif sl_bucket == True:
                     status = "Good"
+                else:
+                    status = "Error"
                 self.tree.insert("", "end", values=(job["project"], job["assignee"], description, status), tags=("new",))
                 self.known_jobs.add(job["project"])
             else:
