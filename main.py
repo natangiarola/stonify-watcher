@@ -55,11 +55,13 @@ class App(tkinter.Tk):
         self.lbl_update = ttk.Label(self, text="Last Update: ")
         self.lbl_update.pack(pady=5)
 
-        self.tree = ttk.Treeview(self, columns=("Project", "CAD Tech", "Description", "SpeedLabel"), show="headings")
+        self.tree = ttk.Treeview(self, columns=("Project", "CAD Tech", "Task", "Description", "SpeedLabel"), show="headings")
         self.tree.heading("Project", text="Project")
         self.tree.column("Project", width=80)
         self.tree.heading("CAD Tech", text="CAD Tech")
         self.tree.column("CAD Tech", width=100)
+        self.tree.heading("Task", text="Task")
+        self.tree.column("Task", width=80)
         self.tree.heading("Description", text="Description")
         self.tree.column("Description", width=150)
         self.tree.heading("SpeedLabel", text="SpeedLabel?")
@@ -67,7 +69,7 @@ class App(tkinter.Tk):
         self.tree.pack(fill="both", expand=True)
         self.tree.tag_configure("new", background="#388bfd", foreground="#0d1117")
 
-        self.known_jobs = set()
+        self.known_jobs = {}
 
         self.poller = None
 
@@ -100,11 +102,10 @@ class App(tkinter.Tk):
                     status = "Good"
                 else:
                     status = "Error"
-                self.tree.insert("", "end", values=(job["project"], job["assignee"], description, status), tags=("new",))
-                self.known_jobs.add(job["project"])
+                self.tree.insert("", "end", values=(job["project"], job["assignee"], job["type"], description, status), tags=("new",))
+                self.known_jobs[job["project"]] = status
             else:
-                self.tree.insert("", "end", values=(job["project"], job["assignee"], description, ""))
-        self.known_jobs = current_ids
+                self.tree.insert("", "end", values=(job["project"], job["assignee"], job["type"], description, self.known_jobs[job["project"]]))
 
 app = App()
 app.mainloop()
